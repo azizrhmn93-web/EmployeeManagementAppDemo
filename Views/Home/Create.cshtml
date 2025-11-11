@@ -1,0 +1,39 @@
+﻿@model CreateViewModel
+
+@{ 
+    ViewBag.Title = "Add Employee";
+}
+
+<div class="container my-5 p-3 p-md-5 bg-light border-1 rounded" style="max-width:700px;">
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <form asp-controller="home" asp-action="create" method="post">
+        <div class="mb-3">
+            <label class="form-label" asp-for="Name"></label>
+            <input class="form-control" asp-for="Name" />
+            <span class="text-danger" asp-validation-for="Name"></span>
+
+        </div>
+
+
+        <div class="mb-3">
+            <label class="form-label" asp-for="Email"></label>
+            <input class="form-control" asp-for="Email" />
+            <span class="text-danger" asp-validation-for="Email"></span>
+
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" asp-for="Departement"></label>
+            <select class="form-select" asp-for="Departement" asp-items="@Model.Departements">
+                <option selected value="">--Select Departement--</option>
+            </select>
+            <span class="text-danger" asp-validation-for="Departement"></span>
+        </div>
+
+        <div class="mb-3 text-center">
+            <button type="submit" class="btn btn-success w-100">Add</button>
+        </div>
+    </form>
+</div>

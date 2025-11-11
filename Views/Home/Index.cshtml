@@ -1,0 +1,77 @@
+﻿@model IEnumerable<Employee>
+@{
+    ViewBag.Title = "Employee List";
+}
+
+<div class="container my-5 px-3 px-md-5">
+    <div class="row row-cols-1 row-cols-md-2 g-5 justify-content-center">
+        @foreach (var employee in Model)
+        {
+            <div class="col">
+                <div class="card shadow" style="max-width: 20rem; margin: 0 auto;">
+                    <img src="~/images/selfie.jpg" style="height:200px; object-fit:cover" class="card-img-top" alt="@employee.Name" />
+                    <div class="card-body text-center d-flex flex-column">
+                        <h5 class="card-title">@employee.Name</h5>
+                        <div class="mt-auto">
+                            <a class="btn btn-primary" asp-controller="Home" asp-action="Details" asp-route-id="@employee.Id">View</a>
+                            <a class="btn btn-secondary" href="#">Edit</a>
+                            <a class="btn btn-danger" href="#">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+
+
+
+
+
+
+@*@model IEnumerable<Employee>
+
+    @{
+        ViewBag.Title = "Employee List";
+    }
+
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-primary mb-0">
+                <i class="fa-solid fa-users me-2"></i> @ViewBag.Title
+            </h2>
+            <a href="#" class="btn btn-success">
+                <i class="fa-solid fa-user-plus me-1"></i> Add Employee
+            </a>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Id</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var employee in Model)
+                            {
+                                <tr>
+                                    <td>@employee.Id</td>
+                                    <td>@employee.Name</td>
+                                    <td>@employee.Email</td>
+                                    <td>@employee.Departement</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>*@
