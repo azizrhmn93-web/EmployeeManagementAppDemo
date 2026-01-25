@@ -1,0 +1,61 @@
+﻿@model CreateViewModel
+
+@{
+    ViewBag.Title = "Add Employee";
+}
+
+
+<div class="container my-2 p-3 p-md-5" style="max-width:700px;">
+    <div class="card shadow-sm mb-4 border-1 rounded-4">
+        <div class="card-body ">
+            <h3 class="pb-4 border-bottom border-1 w-75 mx-auto text-center mb-4">
+                Create New Employee
+            </h3>
+            <form enctype="multipart/form-data" asp-controller="Home" asp-action="Create" method="post">
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Name"></label>
+                    <input class="form-control" asp-for="Name" />
+                    <span class="text-danger" asp-validation-for="Name"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Email"></label>
+                    <input class="form-control" asp-for="Email" />
+                    <span class="text-danger" asp-validation-for="Email"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Departement"></label>
+                    <select class="form-select" asp-for="Departement" asp-items="@Model.Departements">
+                        <option disabled selected value="">--Select Departement--</option>
+                    </select>
+                    <span class="text-danger" asp-validation-for="Departement"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="DateOfBirth">Date of Birth</label>
+                    <input class="form-control" asp-for="DateOfBirth" placeholder="Pick Date" type="text" />
+                    <label for="DateOfBirth" class="form-label text-muted">Employee should be between 18 and 60</label>
+                    <span class="text-danger" asp-validation-for="DateOfBirth"></span>
+                </div>
+
+
+                <div class="mb-3">
+                    <label asp-for="Photo" class="form-label"></label>
+                    <div class="input-group">
+                        <div class="form-control file-trigger" id="photoText">
+                            Choose Photo
+                        </div>
+                        <label class="btn btn-outline-secondary mb-0 file-trigger">
+                            Browse
+                            <input asp-for="Photo"
+                                   class="d-none"
+                                   id="photoInput">
+                        </label>
+                    </div>
+                </div>
+                <div class="row justify-content-center mb-3">
+                    <button type="submit" class="btn btn-primary col-6">Add Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

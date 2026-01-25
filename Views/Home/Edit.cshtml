@@ -1,0 +1,135 @@
+﻿@model ProfileViewModel
+
+@{
+    ViewBag.Title = "Edit Profile";
+    var photoPath = Model.ExistingPhotoPath ?? "/images/noimage.png";
+}
+
+<div class="d-flex align-items-center justify-content-center" style="min-height: 100vh; background-color: #ffffff;">
+    <div class="container" style="max-width: 550px;">
+        @* Tighter width for better symmetry *@
+
+        <div class="card shadow-lg border-1 border-light-subtle rounded-4 overflow-hidden bg-white">
+
+            @* 1. Symmetrical Header Section *@
+            <div class="text-center pt-5 pb-2 px-4 bg-white">
+                <div class="position-relative d-inline-block mb-3">
+                    <img id="profilePreview" src="@photoPath"
+                         class="rounded-circle border border-4 border-white shadow-sm"
+                         style="width: 180px; height: 180px; object-fit: cover;"
+                         alt="Profile Picture" />
+
+                    <label for="photoUpload" class="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle d-flex align-items-center justify-content-center shadow"
+                           style="width: 40px; height: 40px; border: 3px solid #fff; cursor: pointer; transform: translate(2px, 2px);">
+                        <i class="bi bi-camera-fill fs-5"></i>
+                    </label>
+                    <input type="file" name="photoFile" id="photoUpload" class="d-none" accept="image/*" onchange="previewImage(this)">
+                </div>
+                <h4 class="fw-bold text-dark mb-1">Edit Account Information</h4>
+                <p class="text-muted small border-bottom pb-3">User ID: #@Model.Id</p>
+            </div>
+
+            <div class="card-body px-4 px-md-5 pb-5 mt-2">
+                <form asp-action="UpdateProfile" asp-controller="Account" method="post" enctype="multipart/form-data">
+                    @* Hidden fields *@
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="ExistingPhotoPath" />
+
+                    <div class="vstack gap-3">
+                        @* Name *@
+                        <div>
+                            <label class="form-label small fw-bold text-uppercase text-secondary ls-wide mb-1" asp-for="FullName"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                                <input asp-for="FullName" class="form-control border-start-0 ps-0 bg-white" placeholder="Full Name" />
+                            </div>
+                            <span asp-validation-for="FullName" class="text-danger x-small"></span>
+                        </div>
+
+                        @* Username *@
+                        <div>
+                            <label class="form-label small fw-bold text-uppercase text-secondary ls-wide mb-1" asp-for="Username"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-at"></i></span>
+                                <input asp-for="Username" class="form-control border-start-0 ps-0 bg-white" placeholder="Username" />
+                            </div>
+                            <span asp-validation-for="Username" class="text-danger x-small"></span>
+                        </div>
+
+                        @* Email *@
+                        <div>
+                            <label class="form-label small fw-bold text-uppercase text-secondary ls-wide mb-1" asp-for="Email"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                                <input asp-for="Email" class="form-control border-start-0 ps-0 bg-white" placeholder="Email Address" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger x-small"></span>
+                        </div>
+
+                        @* Phone *@
+                        <div>
+                            <label class="form-label small fw-bold text-uppercase text-secondary ls-wide mb-1" asp-for="PhoneNumber"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-telephone"></i></span>
+                                <input asp-for="PhoneNumber" class="form-control border-start-0 ps-0 bg-white" placeholder="Phone Number" />
+                            </div>
+                            <span asp-validation-for="PhoneNumber" class="text-danger x-small"></span>
+                        </div>
+
+                        @* Buttons - Centered and Full Width *@
+                        <div class="pt-4 d-grid gap-2">
+                            <button type="submit" class="btn btn-primary py-2 fw-bold rounded-3 shadow-sm">
+                                Save Profile Changes
+                            </button>
+                            <a asp-action="Index" class="btn btn-link text-secondary text-decoration-none small py-2">
+                                Cancel and return
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ls-wide {
+        letter-spacing: 0.08rem;
+        font-size: 0.7rem;
+    }
+
+    .x-small {
+        font-size: 0.75rem;
+    }
+
+    .input-group-text {
+        border-color: #dee2e6;
+    }
+
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: none;
+    }
+    /* Symmetrical border radius for input groups */
+    .input-group-text {
+        border-radius: 0.5rem 0 0 0.5rem !important;
+    }
+
+    .form-control {
+        border-radius: 0 0.5rem 0.5rem 0 !important;
+    }
+</style>
+
+@section Script {
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('profilePreview').setAttribute('src', e.target.result);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}

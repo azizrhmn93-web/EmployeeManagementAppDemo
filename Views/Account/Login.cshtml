@@ -1,0 +1,100 @@
+﻿@model LoginViewModel
+
+@{
+    ViewBag.Title = "Login";
+}
+
+<div class="d-flex align-items-center justify-content-center" style="min-height: 85vh;">
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            @* col-lg-6 and col-xl-5 make it wider on larger screens *@
+            <div class="col-md-8 col-lg-6 col-xl-5">
+                <div class="card shadow border-0 rounded-4">
+                    <div class="card-body p-4 p-md-5">
+                        @* Increased horizontal padding for wider screens *@
+                        <div class="mb-4">
+                            <h3 class="fw-bold mb-1">Login</h3>
+                            <p class="text-muted small">Welcome back! Please enter your details.</p>
+                        </div>
+
+                        <form asp-action="Login" asp-controller="Account" method="post">
+                            <input type="hidden" asp-for="ReturnUrl" />
+
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="Input" class="form-label fw-medium small mb-1"></label>
+                                <input asp-for="Input" class="form-control border-2" />
+                                <span asp-validation-for="Input" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label asp-for="Password" class="form-label fw-medium small mb-0">Password</label>
+                                    <a asp-action="ForgotPassword" asp-controller="Account" class="text-decoration-none" style="font-size: 0.8rem;">Forgot password?</a>
+                                </div>
+                                <div class="position-relative">
+                                    <input asp-for="Password" type="password" class="form-control border-2 pe-5 password-input" />
+                                    <span class="toggle-password position-absolute top-50 end-0 translate-middle-y me-3 text-muted">
+                                        <i class="bi bi-eye-slash-fill" style="cursor: pointer;"></i>
+                                    </span>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="form-check">
+                                    <input asp-for="RememberMe" class="form-check-input" />
+                                    <label asp-for="RememberMe" class="form-check-label text-muted small">Remember me</label>
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg fw-bold">Sign in</button>
+                            </div>
+                        </form>
+
+                        @if (Model.ExternalLogins != null && Model.ExternalLogins.Any())
+                        {
+                            <div class="text-center my-4">
+                                <div class="position-relative">
+                                    <hr />
+                                    <span class="px-3 text-muted small" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff;">
+                                        Or continue with
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="row g-2">
+                                @* Use a grid for external logins to fill the wider space *@
+                                @foreach (var provider in Model.ExternalLogins)
+                                {
+                                    <div class="col-12">
+                                        <form asp-action="ExternalLogin" asp-controller="Account" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="provider" value="@provider.Name" />
+                                            <button type="submit" class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center gap-2 py-2">
+                                                @if (provider.Name.ToLower().Contains("google"))
+                                                {<i class="bi bi-google"></i> }
+                                                else
+                                                { <i class="bi bi-shield-lock"></i>}
+                                                <span class="fw-bold small">@provider.DisplayName</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        <div class="text-center mt-4">
+                            <p class="text-muted small mb-0">
+                                Don't have an account?
+                                <a asp-action="RegisterUser" asp-controller="Account" class="text-decoration-none fw-bold">Create one</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,110 @@
+﻿@model IEnumerable<AppUser>
+
+@{ 
+    ViewBag.Title = "All users";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <h5 class="mb-0">Users</h5>
+            <div>
+                <a asp-controller="Account" asp-action="RegisterUser" class="btn btn-sm btn-primary">
+                    <i class="bi bi-person-plus"></i> Create user
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="p-4 text-center text-muted">
+                    No users found.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" style="width:48px;">#</th>
+                                <th scope="col">Full Name</th>
+                                <th scope="col">Username</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Email confirmed</th>
+                                <th scope="col" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var index = 1;
+                            }
+                            @foreach (var user in Model)
+                            {
+                                // guard against a null element just in case
+                                if (user == null)
+                                {
+                                    continue;
+                                }
+
+                                // safe full name display: guard null and length
+                                var fullName = string.IsNullOrWhiteSpace(user.FullName)
+                                    ? "(no name)"
+                                    : (user.FullName.Length > 20 ? user.FullName.Substring(0, 20) + "…" : user.FullName);
+
+                                <tr>
+                                    <td>@index</td>
+
+                                    <td>@fullName</td>
+
+                                    <td>@(user.UserName ?? "(no username)")</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(user.Email))
+                                        {
+                                            <a href="mailto:@user.Email">@user.Email</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (user.EmailConfirmed)
+                                        {
+                                            <span class="badge bg-success">Yes</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">No</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-controller="Administration" asp-action="EditUserRoles" asp-route-userId="@user.Id" class="btn btn-sm btn-outline-primary me-1" title="Edit user roles">
+                                            <i class="bi bi-shield-lock"></i>
+                                        </a>
+                                        <a asp-controller="Administration" asp-action="EditUser" asp-route-userId="@user.Id" class="btn btn-sm btn-outline-secondary me-1" title="Edit user">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a asp-controller="Administration" asp-action="DetailsUser" asp-route-userId="@user.Id" class="btn btn-sm btn-outline-info" title="Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                index++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Script {
+    <script>
+        // kept simple; no access to potentially-null user values here
+        // (copyId removed because we no longer render copy buttons)
+    </script>
+}

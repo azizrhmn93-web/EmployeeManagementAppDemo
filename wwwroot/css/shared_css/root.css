@@ -1,0 +1,26 @@
+﻿/* Root variables for typography */
+
+:root {
+    --font-family: 'Inter', sans-serif;
+    --font-size: clamp(16px, 2vw, 20px);
+    --text-color: #222;
+    --bg-color: #f7f7f7;
+    --clr-accent: #007BFF;
+    --line-height: 1.5;
+    --fs-h1: clamp(32px, 5vw, 48px);
+    --fs-h2: clamp(24px, 4vw, 36px);
+    --fs-h3: clamp(20px, 3vw, 30px);
+    --fs-h4: clamp(18px, 2.5vw, 24px);
+    --fs-body: clamp(16px, 2vw, 20px);
+    --fs-small: clamp(12px, 1.5vw, 16px);
+    --fw-h1: 700;
+    --fw-h2: 600;
+    --fw-h3: 500;
+    --fw-h4: 500;
+    --fw-body: 400;
+    --fw-small: 400;
+    --space-1: 0.5rem;
+    --space-2: 1rem;
+    --space-3: 1.5rem;
+    --space-4: 2rem;
+}

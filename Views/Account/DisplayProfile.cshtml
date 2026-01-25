@@ -1,0 +1,84 @@
+﻿@model ProfileViewModel
+
+@{
+    ViewBag.Title = "Account Overview";
+    var photoPath = Model.ExistingPhotoPath ?? "/images/noimage.png";
+}
+
+<div class="py-5" style="min-height: 90vh;">
+    <div class="container">
+        <div class="row g-4 justify-content-center">
+            @* Left Column: Profile Summary *@
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-1 border-light-subtle rounded-4 text-center p-4 h-100">
+                    <div class="mb-3">
+                        <img src="@photoPath"
+                             class="rounded-circle border shadow-sm p-1"
+                             style="width: 160px; height: 160px; object-fit: cover;"
+                             alt="Profile Picture" />
+                    </div>
+                    <h3 class="fw-bold mb-1">@Model.FullName</h3>
+                    <p class="text-primary fw-medium">@Model.Username</p>
+
+                    <div class="d-grid gap-2 mt-4">
+                        @* This button links to your actual Edit action *@
+                        <a asp-action="EditProfile" asp-controller="Account" asp-route-userId="@Model.Id" class="btn btn-primary rounded-pill fw-bold">
+                            <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                        </a>
+                        <a asp-action="ChangePassword" asp-controller="Account" class="btn btn-outline-secondary rounded-pill btn-sm">
+                            <i class="bi bi-shield-lock me-2"></i>Security Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            @* Right Column: Information List *@
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-1 border-light-subtle rounded-4 h-100 overflow-hidden">
+                    <div class="card-header bg-white py-3 px-4 border-bottom-0">
+                        <h5 class="mb-0 fw-bold text-dark">Personal Information</h5>
+                    </div>
+                    <div class="card-body px-4">
+                        @* Info Row: Full Name *@
+                        <div class="row py-3 border-bottom">
+                            <div class="col-sm-4 text-muted small text-uppercase fw-bold">Full Name</div>
+                            <div class="col-sm-8 fw-semibold text-dark">@Model.FullName</div>
+                        </div>
+
+                        @* Info Row: Email *@
+                        <div class="row py-3 border-bottom">
+                            <div class="col-sm-4 text-muted small text-uppercase fw-bold">Email Address</div>
+                            <div class="col-sm-8 text-primary">@Model.Email</div>
+                        </div>
+
+
+                        @* Info Row: Phone *@
+                        <div class="row py-3 border-bottom">
+                            <div class="col-sm-4 text-muted small text-uppercase fw-bold">Phone Number</div>
+                            <div class="col-sm-8 text-dark">@(Model.PhoneNumber ?? "Not provided")</div>
+                        </div>
+
+                        @* Info Row: Account ID *@
+                        <div class="row py-3">
+                            <div class="col-sm-4 text-muted small text-uppercase fw-bold">User ID</div>
+                            <div class="col-sm-8"><code class="text-muted">@Model.Id</code></div>
+                        </div>
+                    </div>
+
+                    @* Footer Status *@
+                <div class="card-footer d-flex justify-content-between bg-light border-0 py-3 px-4 rounded-bottom-4">
+                    <div class="d-flex align-items-center text-success small">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <span>Your account is active and verified.</span>
+                    </div>
+                    <div>
+                        <a asp-controller="home" asp-action="index" class="btn btn-link text-secondary text-decoration-none">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Directory
+                        </a>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
