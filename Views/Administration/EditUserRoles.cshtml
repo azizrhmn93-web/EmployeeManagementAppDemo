@@ -1,0 +1,50 @@
+﻿@model List<EditUserRolesViewModel>
+
+@{
+    ViewBag.Title = "Edit Roles for User";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">Edit Roles</h5>
+        </div>
+        <div class="card-body">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="text-muted">No roles available.</div>
+            }
+            else
+            {
+                <form method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <strong>Username:</strong> @Model.First().userName
+                    </div>
+
+                    <div class="list-group">
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            <div class="list-group-item d-flex align-items-center">
+                                @* Hidden fields so model binding can reconstruct the list on POST *@
+                                <input asp-for="@Model[i].roleId" type="hidden" />
+                                <input asp-for="@Model[i].roleName" type="hidden" />
+
+                                <div class="form-check w-100">
+                                    <input class="form-check-input" asp-for="@Model[i].isSelected" id="roleCheckbox_@i" />
+                                    <label class="form-check-label ms-2" for="roleCheckbox_@i">@Model[@i].roleName</label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a asp-action="ListUsers" asp-controller="Administration" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+</div>

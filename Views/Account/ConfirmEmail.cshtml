@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Confirm your email";
+}
+
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center p-4 p-md-5">
+                    <div class="mb-3">
+                        <!-- Inline SVG check icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 24 24" aria-hidden="true" class="text-success">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" fill="#e9f7ee"></circle>
+                            <path d="M7.5 12.5l2.5 2.5L16.5 9" stroke="#198754" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+                        </svg>
+                    </div>
+
+                    <h1 class="h4 fw-bold mb-2">@ViewData["Title"]</h1>
+                    <p class="text-muted mb-4">Thank you for confirming your email. Your account is now ready.</p>
+
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-4">
+                            Log in
+                        </a>
+                        <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg px-4">
+                            Return to Home
+                        </a>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <p class="small text-muted mb-0">If you didn't request this or need help, contact our <a href="mailto:support@example.com">support team</a>.</p>
+                </div>
+            </div>
+
+            <p class="text-center text-muted small mt-3">Still having issues? <a asp-area="" asp-controller="Account" asp-action="ForgotPassword">Reset your password</a></p>
+        </div>
+    </div>
+</div>

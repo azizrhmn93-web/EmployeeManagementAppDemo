@@ -1,0 +1,71 @@
+﻿@model List<UserRoleViewModel>
+
+@{
+    ViewBag.Title = "Role Membership";
+    var roleName = ViewBag.roleName;
+    var roleId = ViewBag.roleId as string;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <form method="post">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-primary text-white p-4">
+                        <h4 class="mb-0">Manage Role Membership</h4>
+                        <small class="opacity-75">Assigning users to Role Name: @roleName</small>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4" style="width: 70%">User Details</th>
+                                        <th class="text-center" style="width: 30%">Access Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < Model.Count; i++)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-circle me-3">
+                                                        @Model[i].UserName.Substring(0, 1).ToUpper()
+                                                    </div>
+                                                    <div>
+                                                        <span class="fw-bold d-block text-dark">@Model[i].UserName</span>
+                                                        <input type="hidden" asp-for="@Model[i].UserId" />
+                                                        <input type="hidden" asp-for="@Model[i].UserName" />
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="form-check form-switch d-inline-block">
+                                                    <input asp-for="@Model[i].IsSelected" class="form-check-input custom-switch" type="checkbox" role="switch">
+                                                    <label class="form-check-label ms-2 text-muted" asp-for="@Model[i].IsSelected">
+                                                        @(Model[i].IsSelected ? "Included" : "Excluded")
+                                                    </label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-light p-4 d-flex justify-content-between">
+                        <a asp-action="EditRole" asp-controller="Administration" asp-route-id="@roleId" class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-arrow-left"></i> Back to Role
+                        </a>
+                        <button type="submit" class="btn btn-primary px-5 shadow-sm">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

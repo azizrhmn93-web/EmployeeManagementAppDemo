@@ -1,0 +1,145 @@
+﻿@model ProfileViewModel
+
+@{
+    ViewBag.Title = "Edit Profile";
+    var photoPath = Model.ExistingPhotoPath ?? "/images/noimage.png";
+}
+
+<div class="mb-4 d-flex align-items-center justify-content-center" style="min-height: 100vh; background-color: #ffffff;">
+    <div class="container" style="max-width: 550px;">
+        <form asp-action="UpdateProfile" asp-controller="Account" method="post" enctype="multipart/form-data">
+            @* Hidden fields *@
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ExistingPhotoPath" />
+
+            <div class="card shadow-sm border-1 border-light-subtle rounded-4 overflow-hidden">
+
+                @* Centered Header & Photo Section *@
+                <div class="text-center py-4 px-4 bg-white">
+                    <div class="position-relative d-inline-block mb-3">
+                        <img id="profilePreview" src="@photoPath"
+                             class="rounded-circle border border-4 border-white shadow-sm p-1"
+                             style="width: 180px; height: 180px; object-fit: cover;"
+                             alt="Profile Picture" />
+
+                        <label for="photoUpload" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow"
+                               style="width: 38px; height: 38px; border: 3px solid #fff; cursor: pointer; transform: translate(2px, 2px);">
+                            <i class="bi bi-camera-fill"></i>
+                        </label>
+                        <input asp-for="Photo" id="photoUpload" class="d-none" accept="image/*" onchange="previewImage(this)">
+                    </div>
+                    <h4 class="fw-bold text-dark mb-1">Account Settings</h4>
+                    <p class="text-muted small">UserID: @Model.Id</p>
+                </div>
+
+                <div class="card-body px-4 px-md-5 pb-4">
+                    @* Symmetrical Validation Summary *@
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small border-0 shadow-sm mb-4 text-center"></div>
+
+                    <div class="vstack gap-3">
+                        @* Full Name *@
+                        <div class="form-group">
+                            <label asp-for="FullName" class="form-label text-muted extra-small fw-bold text-uppercase ls-1 mb-1"></label>
+                            <div class="input-group">
+                                <span class="input-group-text custom-addon"><i class="bi bi-person text-muted"></i></span>
+                                <input asp-for="FullName" class="form-control custom-input" placeholder="Enter full name" />
+                            </div>
+                            <span asp-validation-for="FullName" class="text-danger extra-small"></span>
+                        </div>
+
+                        @* Username *@
+                        <div class="form-group">
+                            <label asp-for="Username" class="form-label text-muted extra-small fw-bold text-uppercase ls-1 mb-1"></label>
+                            <div class="input-group">
+                                <span class="input-group-text custom-addon"><i class="bi bi-at text-muted"></i></span>
+                                <input asp-for="Username" class="form-control custom-input" placeholder="Username" />
+                            </div>
+                            <span asp-validation-for="Username" class="text-danger extra-small"></span>
+                        </div>
+
+                        @* Email *@
+                        <div class="form-group">
+                            <label asp-for="Email" class="form-label text-muted extra-small fw-bold text-uppercase ls-1 mb-1"></label>
+                            <div class="input-group">
+                                <span class="input-group-text custom-addon"><i class="bi bi-envelope text-muted"></i></span>
+                                <input asp-for="Email" class="form-control custom-input" placeholder="email@example.com" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger extra-small"></span>
+                        </div>
+
+                        @* Phone *@
+                        <div class="form-group">
+                            <label asp-for="PhoneNumber" class="form-label text-muted extra-small fw-bold text-uppercase ls-1 mb-1"></label>
+                            <div class="input-group">
+                                <span class="input-group-text custom-addon"><i class="bi bi-telephone text-muted"></i></span>
+                                <input asp-for="PhoneNumber" class="form-control custom-input" placeholder="Phone number" />
+                            </div>
+                            <span asp-validation-for="PhoneNumber" class="text-danger extra-small"></span>
+                        </div>
+                    </div>
+                </div>
+
+                @* Symmetrical Action Buttons *@
+                <div class="card-footer bg-white border-top-0 pb-5 px-5">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary py-2 fw-bold rounded-3 shadow-sm">
+                            Save Changes
+                        </button>
+                        <a asp-action="Index" class="btn btn-link text-secondary text-decoration-none extra-small fw-semibold text-center">
+                            Cancel and go back
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Script {
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('profilePreview').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}
+
+<style>
+    /* Letter spacing for modern labels */
+    .ls-1 {
+        letter-spacing: 0.08rem;
+    }
+
+    .extra-small {
+        font-size: 0.72rem;
+    }
+
+    /* Custom Input Styling to replace 'light' inputs against a white background */
+    .custom-input {
+        background-color: #fcfcfc !important;
+        border: 1px solid #e9ecef !important;
+        border-left: none !important;
+        border-radius: 0 0.5rem 0.5rem 0 !important;
+        font-size: 0.95rem;
+        padding: 0.6rem 0.85rem;
+    }
+
+    .custom-addon {
+        background-color: #fcfcfc !important;
+        border: 1px solid #e9ecef !important;
+        border-right: none !important;
+        border-radius: 0.5rem 0 0 0.5rem !important;
+    }
+
+    /* Subtle focus state */
+    .custom-input:focus {
+        background-color: #ffffff !important;
+        border-color: #0d6efd !important;
+        box-shadow: none !important;
+    }
+</style>

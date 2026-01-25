@@ -1,0 +1,56 @@
+﻿@using System.Security.Claims
+@{
+    ViewData["Title"] = "Access Denied";
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var isAdmin = User.IsInRole("Admin");
+}
+
+<div class="container mt-5">
+    <div class="text-center mb-4">
+        <h1 class="display-4 text-danger"><i class="bi bi-exclamation-octagon"></i> 403</h1>
+        <h2>Access Denied</h2>
+    </div>
+
+    <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+        <div class="card-body text-center">
+
+            @if (!isAuthenticated)
+            {
+                <p class="lead">You need to be signed in to view this page.</p>
+                <a href="/Account/Login?ReturnUrl=@Context.Request.Query["ReturnUrl"]"
+                   class="btn btn-primary w-100">Sign In Now</a>
+            }
+            else if (isAdmin)
+            {
+                <p class="lead">Welcome, Administrator <strong>@User.Identity.Name</strong>.</p>
+                <div class="alert alert-info py-2">
+                    <small>Identity Verified: <strong>Admin Role Found</strong></small>
+                </div>
+                <p class="text-muted">
+                    However, your administrative profile lacks the specific
+                    <strong>Claim</strong> required for this action (e.g., <em>Delete Permissions</em>).
+                </p>
+                <p>Please contact the system architect to elevate your claim status.</p>
+            }
+            else
+            {
+                <p class="lead">Sorry, <strong>@User.Identity.Name</strong>.</p>
+                <p>Your current account does not have the permissions required to access this resource.</p>
+                <p class="text-muted">Required Role: <strong>Admin</strong></p>
+                <hr />
+                <p>If you have an admin account, please log out and try again.</p>
+            }
+
+            <div class="mt-4 d-flex justify-content-between">
+                <a href="javascript:history.back()" class="btn btn-link text-secondary">Go Back</a>
+                <a href="/" class="btn btn-outline-primary">Home Page</a>
+                @if (isAuthenticated)
+                {
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        <button type="submit" class="btn btn-outline-danger">Logout</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

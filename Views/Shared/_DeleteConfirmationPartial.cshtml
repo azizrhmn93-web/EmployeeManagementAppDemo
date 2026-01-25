@@ -1,0 +1,32 @@
+﻿@model DeleteModalViewModel
+<div class="modal fade" id="@Model.ModalId" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            @* Use asp-all-route-data to handle different ID names dynamically *@
+            <form asp-action="@Model.ModalAction" asp-controller="@Model.ModalController" asp-route-id="@Model.RouteId" method="post">
+                @Html.AntiForgeryToken()
+
+                @* IMPORTANT: Match the ID parameter name *@
+                <input type="hidden" name="id" value="@Model.RouteId" />
+                @* If this is for Identity Users, keep this one too *@
+                <input type="hidden" name="userId" value="@Model.RouteId" />
+
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title text-danger" id="confirmDeleteModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Delete
+                    </h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3">
+                    <p class="mb-2">Are you sure you want to delete <strong>@Model.ItemName</strong>?</p>
+                    <p class="small text-muted mb-0">This action is permanent and cannot be undone.</p>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    @* Pass the ID in the route here as well to be safe *@
+                    <button type="submit" class="btn btn-danger btn-sm px-3">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

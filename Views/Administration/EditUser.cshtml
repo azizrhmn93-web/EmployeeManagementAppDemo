@@ -1,0 +1,186 @@
+﻿@model EditUserViewModel
+@using Microsoft.AspNetCore.Authorization
+
+@inject IAuthorizationService iAuthService;
+
+@{
+    ViewBag.Title = "Edit User";
+}
+
+<style>
+</style>
+
+<div class="container py-4">
+    @* Breadcrumb *@
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a asp-action="ListUsers" class="text-decoration-none">Users</a></li>
+            <li class="breadcrumb-item active text-truncate" style="max-width: 200px;">@Model.UserName</li>
+        </ol>
+    </nav>
+
+    @* align-items-stretch ensures left and right columns have equal height *@
+    <div class="row g-4 align-items-stretch">
+
+        @* LEFT COLUMN: Identity & Permissions *@
+        <div class="col-lg-4 d-flex flex-column">
+
+            @* Identity Card - flex-grow-1 makes it fill the space above Danger Zone *@
+            <div class="card shadow-sm border-0 mb-3 flex-grow-1 d-flex flex-column">
+                <div class="card-body p-3 d-flex flex-column">
+
+                    @* Profile Header *@
+                    <div class="text-center mb-2">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-2" style="width: 60px; height: 60px;">
+                            <i class="bi bi-person-fill fs-2"></i>
+                        </div>
+                        <h6 class="mb-0 text-truncate">@Model.UserName</h6>
+                        <p class="text-muted mb-0" style="font-size: 0.7rem;">ID: @Model.Id</p>
+                    </div>
+
+                    <hr class="my-2 opacity-25">
+
+                    @* Roles Section *@
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="small text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Roles</strong>
+                            <a asp-action="EditUserRoles" asp-route-userId="@Model.Id" class="btn btn-sm btn-link text-decoration-none p-0" style="font-size: 0.75rem;">Manage</a>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1">
+                            @if (Model.UserRoles.Any())
+                            {
+                                foreach (var rn in Model.UserRoles)
+                                {
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-1 px-2" style="font-size: 0.7rem;">
+                                        <i class="bi bi-shield-check me-1"></i>@rn
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted small fst-italic">No roles assigned.</span>
+                            }
+                        </div>
+                    </div>
+
+                    @* Claims Section - This expands to fill the remaining height *@
+                    <div class="d-flex flex-column flex-grow-1" style="min-height: 0;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="small text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Claims</strong>
+                            @if ((await iAuthService.AuthorizeAsync(User, "UpdateUserClaimsPolicy")).Succeeded)
+                            {
+                                <a asp-action="EditUserClaims" asp-route-userId="@Model.Id" class="btn btn-sm btn-link text-decoration-none p-0"
+                                   style="font-size: 0.75rem;">Manage</a>
+                            }
+                        </div>
+
+                        @if (Model.Claims.Any())
+                        {
+                            <div class="flex-grow-1 border rounded bg-light bg-opacity-50 overflow-y-auto claims-scroll-box" style="min-height: 120px;">
+                                <div class="list-group list-group-flush">
+                                    @foreach (var c in Model.Claims)
+                                    {
+                                        <div class="list-group-item bg-transparent py-1 px-2 border-0 small" style="font-size: 0.75rem;">
+                                            <i class="bi bi-patch-check text-success me-1"></i> @c
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="flex-grow-1 border border-dashed rounded d-flex align-items-center justify-content-center">
+                                <span class="text-muted small fst-italic">No claims defined.</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @* Danger Zone - Pinned to the very bottom of the left column *@
+            <div class="card border-danger border-opacity-25 shadow-sm">
+                <div class="card-body p-3">
+                    <h6 class="text-danger fw-bold small text-uppercase mb-2" style="font-size: 0.7rem;">Danger Zone</h6>
+                    <button type="button" class="btn btn-outline-danger btn-sm w-100 py-1" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                        <i class="bi bi-trash me-1"></i> Delete User Account
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        @* RIGHT COLUMN: Main Profile Form *@
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="mb-0">Profile Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" class="row g-4">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="Id" type="hidden" />
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="col-md-6">
+                            <label asp-for="UserName" class="form-label fw-semibold small text-muted text-uppercase">Username</label>
+                            <input asp-for="UserName" class="form-control shadow-none" placeholder="Enter username" />
+                            <span asp-validation-for="UserName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="FullName" class="form-label fw-semibold small text-muted text-uppercase">Full Name</label>
+                            <input asp-for="FullName" class="form-control shadow-none" placeholder="Enter full name" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold small text-muted text-uppercase">Email Address</label>
+                            <input asp-for="Email" class="form-control shadow-none" placeholder="email@example.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold small text-muted text-uppercase">Phone Number</label>
+                            <input asp-for="PhoneNumber" class="form-control shadow-none" placeholder="Phone number" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check form-switch p-3 border rounded bg-light bg-opacity-50">
+                                <input class="form-check-input ms-0 me-3" type="checkbox" asp-for="EmailConfirmed" id="EmailConfirmed">
+                                <label class="form-check-label fw-semibold" for="EmailConfirmed">Email Address Confirmed</label>
+                                <div class="small text-muted ms-5">Manual override for user activation status.</div>
+                            </div>
+                        </div>
+
+                        @* Button Group - Pushed down by spacer to align with sidebar *@
+                        <div class="col-12 text-end mt-auto pt-4 border-top">
+                            <a asp-action="ListUsers" class="btn btn-outline-secondary px-4 me-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-5 shadow-sm">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Delete Confirmation Modal *@
+@await Html.PartialAsync("_DeleteConfirmationPartial", new DeleteModalViewModel
+{
+    ModalController = "Administration",
+    ModalAction = "DeleteUser",
+    ModalId = "confirmDeleteModal",
+    RouteId = Model.Id,
+    ItemName = Model.UserName
+})
+
+@section Script {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Initialization for Tooltips or UI tweaks
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log("Edit User View Initialized");
+        });
+    </script>
+}

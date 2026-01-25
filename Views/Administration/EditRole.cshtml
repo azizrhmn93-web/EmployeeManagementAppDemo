@@ -1,0 +1,73 @@
+﻿@model EditRoleViewModel
+
+@{
+    ViewBag.Title = "Edit Role";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 text-primary fw-bold">Role Settings</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="EditRole" asp-controller="Administration" method="post">
+                        <div asp-validation-summary="All" class="text-danger small"></div>
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-4">
+                            <label asp-for="RoleName" class="form-label fw-semibold">Role Name</label>
+                            <input asp-for="RoleName" class="form-control form-control-lg" placeholder="Enter role name..." />
+                            <span asp-validation-for="RoleName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary px-4">Update Role</button>
+                            <a asp-action="ListRoles" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-dark fw-bold">Current Members</h5>
+                    <span class="badge bg-soft-primary text-primary">@Model.Users.Count Users</span>
+                </div>
+                <div class="card-body">
+                    @if (Model.Users.Any())
+                    {
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var user in Model.Users)
+                            {
+                                <div class="badge-user d-flex align-items-center bg-light border rounded-pill px-3 py-2">
+                                    <div class="avatar-xs me-2">@user.Substring(0, 1).ToUpper()</div>
+                                    <span class="text-dark">@user</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="bi bi-people text-muted fs-1"></i>
+                            <p class="text-muted mt-2">No users currently assigned to this role.</p>
+                        </div>
+                    }
+
+                    <hr class="my-4 text-muted opacity-25" />
+                    
+                    <div class="text-center">
+                        <a asp-action="EditUsersInRole" asp-controller="Administration" asp-route-roleId="@Model.Id" 
+                           class="btn btn-light border text-primary fw-bold px-4">
+                            <i class="bi bi-person-plus-fill me-2"></i>Manage Members
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
