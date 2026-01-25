@@ -39,6 +39,17 @@ It’s designed as a demo to showcase core functionality and best practices in A
 * Identity integration with extended user properties
 * Database migrations for schema management
 
+Additional features added since initial scaffold:
+
+* External authentication (Google) — sign in with external providers
+* Email confirmation and secure token handling for registration
+* Password reset flow with tokenized reset links
+* Role management UI (create, list, edit roles) and user-role assignment
+* Claim management per user (view, bulk toggle, add/remove claims)
+* Ability for admins to delete users (with confirmation and safety checks)
+* Improved Login/Reset UX and client-side validation support
+* Theme toggle (light/dark) persisted in localStorage for UX polish
+
 ---
 
 ## Project Structure
@@ -74,6 +85,15 @@ The following updates have been made in the **master branch** compared to **main
 * `Controllers/ErrorController.cs` – Error handling
 * `Migrations/20251230093701_CreateIdentitySchema.*` – Initial Identity schema migration
 * `Migrations/20260102034821_Extend_IdentityUser.Designer.cs` – Extending Identity user
+* Views and ViewModels for role & claim management:
+  * `Views/Administration/ListUsers.cshtml`, `EditUser.cshtml`, `EditUserRoles.cshtml`, `EditUserClaims.cshtml`
+  * `ViewModel/EditUserViewModel.cs`, `EditUserRolesViewModel.cs`, `EditUserClaimsViewModel.cs`, `UserClaimViewModel.cs`
+* External login support (Google) configured in `Program.cs` and `AccountController`.
+* Password reset and email confirmation flows with token providers and configured lifespans.
+* `Views/Account/Login.cshtml` — modernized login UI and external login buttons.
+* `_ValidationScriptsPartial.cshtml` added to centralize client-side validation script includes.
+* Delete user support (controller action + confirmation modal in `EditUser` view).
+* Theme toggle (light/dark) persisted in browser localStorage implemented in layout `_Layout.cshtml`.
 
 ### Modified
 
@@ -81,6 +101,9 @@ The following updates have been made in the **master branch** compared to **main
 * `Controllers/HomeController.cs` – Updated home page logic
 * `EmployeeManagement.csproj` – Project updated for new controllers/migrations
 * `EmployeeManagement.sln` – Solution file updated
+* `Views/Shared/_Layout.cshtml` — layout updated with theme toggle, improved navbar and mobile offcanvas menu.
+* `Views/Account/ResetPassword.cshtml` and `ViewModel/ResetPasswordViewModel.cs` — fixed model binding and UX.
+* Various administration views refined for usability and accessibility.
 
 ---
 
