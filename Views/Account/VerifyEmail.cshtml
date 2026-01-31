@@ -1,0 +1,88 @@
+﻿@using EmployeeManagement.Controllers;
+@model string;
+
+
+@{
+    ViewBag.Title = "Verify Your Email";
+    var userEmail = @Model ?? "your email address";
+}
+
+<div class="pb-5 d-flex align-items-center justify-content-center" style="min-height: 100vh; background-color: #ffffff;">
+    <div class="container" style="max-width: 500px;">
+
+        <div class="card shadow-lg border-1 border-light-subtle rounded-4 overflow-hidden">
+
+            @* 1. Symmetrical Header *@
+            <div class="text-center pt-4 pb-4 px-4 bg-white">
+                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4 shadow-sm" style="width: 90px; height: 90px;">
+                    <i class="bi bi-send-check text-primary" style="font-size: 2.8rem;"></i>
+                </div>
+                <h3 class="fw-bold text-dark mb-1">Verify your identity</h3>
+                <p class="text-muted small">A security link is waiting in your inbox</p>
+            </div>
+
+            @* 2. Content Section *@
+            <div class="card-body px-4 px-md-5 pb-4 pt-0 text-center">
+                <div class="vstack gap-3">
+                    @* Displaying the dynamic email from ViewBag *@
+                    <div class="p-3 bg-light rounded-3 mb-3 border border-dashed">
+                        <span class="text-muted small d-block text-uppercase fw-bold ls-1 mb-1">Sent to:</span>
+                        <span class="fw-semibold text-dark">@userEmail</span>
+                    </div>
+
+                    <p class="small text-secondary mb-3">
+                        We've sent a unique confirmation link to the address above.
+                        Please click the link to activate your account.
+                    </p>
+
+                    @* Action Buttons *@
+                    <div class="d-grid gap-2">
+                        @* Using mailto: to open the user's preferred local mail app *@
+                        <a href="mailto:" class="btn btn-primary py-2 fw-bold rounded-3 shadow-sm">
+                            <i class="bi bi-envelope-open me-2"></i>Open Mail App
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-link text-secondary text-decoration-none small py-1">
+                            Back to Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            @* 3. Resend Action Footer *@
+        <div class="card-footer bg-white border-top border-light-subtle py-3 text-center">
+            <form asp-action="@nameof(AccountController.ResendEmailVerification)" asp-route-email="@Model" method="Post">
+                <p class="small text-muted mb-0">
+                    Didn't receive the email?
+                    <button type="submit" class="btn btn-link p-0 fw-bold text-primary border-0 text-decoration-none border-bottom border-primary border-2"
+                            style="font-size: inherit; vertical-align: baseline; border-radius:0">
+                        Resend link
+                    </button>
+                </p>
+            </form>
+            
+        </div>
+        </div>
+
+        @* Branding / Security Note *@
+        <div class="text-center mt-4">
+            <p class="text-muted text-uppercase fw-bold ls-2" style="font-size: 0.6rem;">
+                <i class="bi bi-shield-check me-1"></i> Secure Authentication
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ls-1 {
+        letter-spacing: 0.05rem;
+    }
+
+    .ls-2 {
+        letter-spacing: 0.15rem;
+    }
+    /* Border dashed utility for the email box */
+    .border-dashed {
+        border-style: dashed !important;
+        border-width: 2px !important;
+    }
+</style>

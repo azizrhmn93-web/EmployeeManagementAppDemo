@@ -7,15 +7,14 @@ namespace EmployeeManagement.ViewModel
     public class CreateViewModel
     {
         [Required(ErrorMessage = "Name is required")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
-       
         public Dept Departement { get; set; } 
 
         [Required(ErrorMessage = "Email is Required")]
         [EmailAddress(ErrorMessage = "Invalid Email Address")]
-        public string Email {  get; set; }
+        public string Email {  get; set; } = string.Empty;
 
         public IEnumerable<SelectListItem>? Departements { get; set; }
 

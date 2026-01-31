@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Reflection.Metadata.Ecma335;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Mvc;
+using EmployeeManagement.Services;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 internal class Program
 {
@@ -32,6 +35,9 @@ internal class Program
             options.Password.RequireDigit = true;
             options.Password.RequiredUniqueChars = 1;
 
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+
             options.Tokens.EmailConfirmationTokenProvider = "EmailTokenProvider";
         }).AddEntityFrameworkStores<AppDBContext>()
         .AddDefaultTokenProviders()
@@ -53,6 +59,7 @@ internal class Program
                              .RequireAuthenticatedUser()
                              .Build();
             options.Filters.Add(new AuthorizeFilter(policy));
+            options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
         }).AddXmlDataContractSerializerFormatters();
 
         builder.Services.AddHttpContextAccessor();
@@ -76,6 +83,8 @@ internal class Program
                 options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
             });
         builder.Services.AddScoped<IEmployeeDepository, DbEmployeeDepository>();
+        builder.Services.AddTransient<IEmailSender, EmailSender>();
+        builder.Services.AddDataProtection();
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())

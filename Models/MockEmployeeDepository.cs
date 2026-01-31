@@ -22,7 +22,7 @@ namespace EmployeeManagement.Models
             return employeeList;
         }
 
-        public Employee GetEmployee(int id)
+        public Employee? GetEmployee(int id)
         {
             return employeeList.FirstOrDefault(e => e.Id == id);
         }
@@ -34,7 +34,7 @@ namespace EmployeeManagement.Models
             return employee;
         }
 
-        public Employee UpdateEmployee(Employee employeeUpdates)
+        public Employee? UpdateEmployee(Employee employeeUpdates)
         {
             var emp = employeeList.FirstOrDefault(e => e.Id == employeeUpdates.Id);
             if (emp != null)
@@ -42,14 +42,16 @@ namespace EmployeeManagement.Models
                 emp.Name = employeeUpdates.Name;
                 emp.Email = employeeUpdates.Email;
                 emp.Departement = employeeUpdates.Departement;
+                emp.PhotoPath = employeeUpdates.PhotoPath;
+                emp.DateOfBirth = employeeUpdates.DateOfBirth;
             }
             return emp;
             
         }
 
-        public Employee DeleteEmployee(int id)
+        public Employee? DeleteEmployee(int id)
         {
-            var emp = employeeList.FirstOrDefault(e => e.Id ==id);
+            var emp = employeeList.FirstOrDefault(e => e.Id == id);
             if (emp != null)
             {
                 employeeList.Remove(emp);

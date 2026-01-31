@@ -1,9 +1,13 @@
 ﻿using EmployeeManagement.Models;
+using EmployeeManagement.Services;
 using EmployeeManagement.ViewModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations;
@@ -20,15 +24,18 @@ namespace EmployeeManagement.Controllers
         private readonly IConfiguration configuration;
         private readonly ILogger<AccountController> logger;
         private readonly IWebHostEnvironment hostEnvironment;
+        private readonly IEmailSender emailSender;
 
         public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
-            IConfiguration configuration, ILogger<AccountController> logger, IWebHostEnvironment hostEnvironment)
+            IConfiguration configuration, ILogger<AccountController> logger, IWebHostEnvironment hostEnvironment,
+            IEmailSender emailSender)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.configuration = configuration;
             this.logger = logger;
             this.hostEnvironment = hostEnvironment;
+            this.emailSender = emailSender;
         }
         [HttpGet]
         public IActionResult RegisterUser()
@@ -55,13 +62,17 @@ namespace EmployeeManagement.Controllers
                     var confirmationLink = Url.Action("ConfirmEmail", "Account",
                         new { userId = user.Id, token = token }, Request.Scheme);
 
-                    logger.Log(LogLevel.Warning, $"Email Confirmation Link {confirmationLink}");
+                    var emailSubject = "Confirm Your Email";
+                    var emailBody = $"Please confirm your account by <a href='{confirmationLink}'>clicking here</a>.";
+                    await emailSender.SendEmailAsync(user.Email!, emailSubject, emailBody);
+
+                    logger.Log(logLevel: LogLevel.Warning, $"Email Confirmation Link: {confirmationLink}");
 
                     if (signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
                     {
                         return RedirectToAction("ListUsers", "Administration");
                     }
-                    return View("RegistrationSuccessful");
+                    return View("VerifyEmail");
                 }
                 foreach (var error in result.Errors)
                 {
@@ -104,7 +115,7 @@ namespace EmployeeManagement.Controllers
 
             var domain = Email.Split('@').Last();
 
-            if (!allowedDomains.Contains(domain, StringComparer.OrdinalIgnoreCase))
+            if (!allowedDomains!.Contains(domain, StringComparer.OrdinalIgnoreCase))
             {
                 return Json("Email domain is not allowed.");
             }
@@ -161,17 +172,27 @@ namespace EmployeeManagement.Controllers
 
                 if (!user.EmailConfirmed && (await userManager.CheckPasswordAsync(user, model.Password)))
                 {
-                    ModelState.AddModelError(string.Empty, "Account not confirmed yet, Confirmation link has been sent to your email, kindly confirm your account first");
                     var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
                     var confirmationLink = Url.Action("ConfirmEmail", "Account",
                         new { userId = user.Id, token = token }, Request.Scheme);
 
-                    logger.Log(LogLevel.Warning, $"Email Confirmation Link {confirmationLink}");
-                    return View(model);
+                    var emailSubject = "Confirm Your Email";
+                    var emailBody = EmailTemplates.GetHtmlTemplate(
+                        "Confirm Email",
+                        "We received a request to confirm your email. If you didn't make this request, you can safely ignore this email.",
+                        "Confrim Email",
+                        confirmationLink!);
+                    await emailSender.SendEmailAsync(user.Email!, emailSubject, emailBody);
+
+                    //send a copy to log file too
+                    logger.Log(LogLevel.Warning, $"Email Confirmation Link: {confirmationLink}");
+
+                    // Resend the verification email
+                    return RedirectToAction("VerifyEmail", new { email = model.Input });
                 }
 
                 // Fix: user.UserName is guaranteed non-null here because user is not null
-                var result = await signInManager.PasswordSignInAsync(user.UserName!, model.Password, model.RememberMe, lockoutOnFailure: false);
+                var result = await signInManager.PasswordSignInAsync(user.UserName!, model.Password, model.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
                     TempData["ToastMessage"] = "Successfully Logged In";
@@ -183,7 +204,13 @@ namespace EmployeeManagement.Controllers
 
                     return RedirectToAction("Index", "Home");
                 }
-                ModelState.AddModelError(string.Empty, "Invalid Login Attempt");
+
+                if(result.IsLockedOut)
+                {
+                    return View("AccountLocked");
+                }
+                var triesLeft = 5 - await userManager.GetAccessFailedCountAsync(user);
+                ModelState.AddModelError(string.Empty, $"Invalid Login Attempt, you have {triesLeft} tries left");
             }
             return View(model);
         }
@@ -270,10 +297,20 @@ namespace EmployeeManagement.Controllers
             }
             else if (!user.EmailConfirmed)
             {
-                // Existing local user found but email not confirmed. A successful external provider login
-                // is treated as sufficient verification to confirm the email. Update the user.
-                user.EmailConfirmed = true;
-                await userManager.UpdateAsync(user);
+                //if unconfirmed account exist delete it to prevent security vulnerabilty
+                //A malicious user might have created this account using the real owner's email addrss we can't simply confirm it
+                //and link it to local account, because the malicious user can access it, because he has the password
+                await userManager.DeleteAsync(user);
+
+                user = new AppUser()
+                {
+                    Email = email,
+                    UserName = email,
+                    FullName = info.Principal?.FindFirstValue(ClaimTypes.Name) ?? string.Empty,
+                    EmailConfirmed = true
+                };
+
+                await userManager.CreateAsync(user);
             }
 
             // Link the external login to the local user. This prevents duplicate accounts on future logins.
@@ -313,7 +350,18 @@ namespace EmployeeManagement.Controllers
                 {
                     var token = await userManager.GeneratePasswordResetTokenAsync(user);
                     var resetLink = Url.Action("ResetPassword", "Account", new { email = model.Email, token = token }, Request.Scheme);
-                    logger.Log(LogLevel.Warning, resetLink);
+
+                   
+                    var emailSubject = "Reset Your Password";
+                    var emailBody = EmailTemplates.GetHtmlTemplate(
+                        "Reset Password",
+                        "We received a request to reset your password. If you didn't make this request, you can safely ignore this email.",
+                        "Reset Password",
+                        resetLink!);
+                    await emailSender.SendEmailAsync(user.Email!, emailSubject, emailBody);
+                    
+                    //send a copy to log file too
+                    logger.Log(LogLevel.Warning, $"Reset Password Link: {resetLink}");
                 }
                 return View("ForgotPasswordConfirmation");
             }
@@ -347,6 +395,8 @@ namespace EmployeeManagement.Controllers
                     var passwordChangeResult = await userManager.ResetPasswordAsync(user, model.Token, model.Password);
                     if (passwordChangeResult.Succeeded)
                     {
+                        if (await userManager.IsLockedOutAsync(user))
+                            await userManager.SetLockoutEndDateAsync(user, DateTime.UtcNow);
                         return View("PasswordUpdated");
                     }
                     foreach (var error in passwordChangeResult.Errors)
@@ -378,6 +428,7 @@ namespace EmployeeManagement.Controllers
             {
                 return NotFound("User not found.");
             }
+
             var model = new ProfileViewModel()
             {
                 FullName = user.FullName,
@@ -454,8 +505,21 @@ namespace EmployeeManagement.Controllers
         }
 
         [HttpGet]
-        public IActionResult ChangePassword()
+        public async Task<IActionResult> ChangePassword()
         {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                ViewBag.Message = $"User is not available";
+                return View("NotFound");
+            }
+
+            var hasPassword = await userManager.HasPasswordAsync(user);
+
+            if (!hasPassword)
+            {
+                return RedirectToAction("AddPassword");
+            }
             return View();
         }
 
@@ -469,8 +533,8 @@ namespace EmployeeManagement.Controllers
                 {
                     return RedirectToAction("Login", "Account");
                 }
+                IdentityResult result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
 
-                var result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
                 if (result.Succeeded)
                 {
                     await signInManager.RefreshSignInAsync(user);
@@ -486,5 +550,91 @@ namespace EmployeeManagement.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult VerifyEmail(string email)
+        {
+            return View("VerifyEmail", email);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResendEmailVerification(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("Login");
+            }
+            var user = await userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return View("VerifyEmail");
+            }
+
+            if(user.EmailConfirmed)
+            {
+                TempData["ToastMessage"] = "Email is already confirmed. Please login.";
+                return RedirectToAction("Login");
+            }
+
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            var confirmationLink = Url.Action("ConfirmEmail", "Account",
+                new { userId = user.Id, token = token }, Request.Scheme);
+
+            var emailSubject = "Confirm Your Email";
+            var emailBody = $"Please confirm your account by <a href='{confirmationLink}'>clicking here</a>.";
+            await emailSender.SendEmailAsync(user.Email!, emailSubject, emailBody);
+
+            //send a copy of the token to the log file as well
+            logger.Log(LogLevel.Warning, $"Email Confirmation Link {confirmationLink}");
+            
+            TempData["ToastMessage"] = "Verification email sent. Please check your email.";
+
+            return View("VerifyEmail", email);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AddPassword()
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                ViewBag.Message = $"User is not available";
+                return View("NotFound");
+            }
+            var hasPassword = await userManager.HasPasswordAsync(user);
+
+            if (hasPassword)
+            {
+                return RedirectToAction("ChangePassword");
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddPassword(AddPasswordViewModel model)
+        {
+            if(ModelState.IsValid)
+            {
+                var user = await userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    ViewBag.Message = $"User is not available";
+                    return View("NotFound");
+                }
+
+                var result = await userManager.AddPasswordAsync(user, model.NewPassword);
+                if (result.Succeeded)
+                {
+                    await signInManager.RefreshSignInAsync(user);
+                    TempData["ToastMessage"] = "You have successfully add a password to your account";
+                    return RedirectToAction("DisplayProfile");
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+            return View();
+        }
     }
 }

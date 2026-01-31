@@ -1,88 +1,81 @@
-﻿@model ProfileViewModel
+﻿@model EditViewModel
 
 @{
-    ViewBag.Title = "Edit Profile";
-    var photoPath = Model.ExistingPhotoPath ?? "/images/noimage.png";
+    ViewBag.Title = "Edit Employee";
+    var photoPath = "~/images/" + (Model.ExistingImagePath ?? "noimage.png");
 }
 
-<div class="d-flex align-items-center justify-content-center" style="min-height: 100vh; background-color: #ffffff;">
-    <div class="container" style="max-width: 550px;">
-        @* Tighter width for better symmetry *@
+<div class="mb-4 d-flex align-items-center justify-content-center" style="min-height: 100vh; background-color: #f8f9fa;">
+    <div class="container" style="max-width: 500px;">
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white">
 
-        <div class="card shadow-lg border-1 border-light-subtle rounded-4 overflow-hidden bg-white">
-
-            @* 1. Symmetrical Header Section *@
-            <div class="text-center pt-5 pb-2 px-4 bg-white">
+            <div class="text-center pt-5 px-4">
                 <div class="position-relative d-inline-block mb-3">
-                    <img id="profilePreview" src="@photoPath"
+                    <img id="profilePreview" src="@photoPath" asp-append-version="true"
                          class="rounded-circle border border-4 border-white shadow-sm"
-                         style="width: 180px; height: 180px; object-fit: cover;"
+                         style="width: 180px; height: 180px; object-fit: cover; background-color: #eee;"
                          alt="Profile Picture" />
 
-                    <label for="photoUpload" class="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle d-flex align-items-center justify-content-center shadow"
-                           style="width: 40px; height: 40px; border: 3px solid #fff; cursor: pointer; transform: translate(2px, 2px);">
-                        <i class="bi bi-camera-fill fs-5"></i>
+                    <label for="photoInput" class="action-btn bg-primary text-white position-absolute shadow"
+                           style="bottom: 5px; right: 5px; width: 40px; height: 40px; border-radius: 50%; border: 3px solid #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-camera-fill"></i>
                     </label>
-                    <input type="file" name="photoFile" id="photoUpload" class="d-none" accept="image/*" onchange="previewImage(this)">
+
+                    <button type="button" id="removeBtn" class="action-btn bg-danger text-white position-absolute shadow @(string.IsNullOrEmpty(Model.ExistingImagePath) ? "d-none" : "d-flex")"
+                            style="top: 5px; right: 5px; width: 35px; height: 35px; border-radius: 50%; border: 3px solid #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-trash-fill" style="font-size: 0.85rem;"></i>
+                    </button>
                 </div>
-                <h4 class="fw-bold text-dark mb-1">Edit Account Information</h4>
-                <p class="text-muted small border-bottom pb-3">User ID: #@Model.Id</p>
+
+                <h4 class="fw-bold text-dark mb-1">Edit Profile</h4>
+                <p class="text-muted small pb-3 border-bottom mx-4">Employee ID: #@Model.Id</p>
             </div>
 
-            <div class="card-body px-4 px-md-5 pb-5 mt-2">
-                <form asp-action="UpdateProfile" asp-controller="Account" method="post" enctype="multipart/form-data">
-                    @* Hidden fields *@
+            <div class="card-body px-4 pb-4">
+                <form enctype="multipart/form-data" asp-controller="Home" asp-action="Edit" method="post">
                     <input type="hidden" asp-for="Id" />
-                    <input type="hidden" asp-for="ExistingPhotoPath" />
+                    <input type="hidden" asp-for="ExistingImagePath" />
+                    <input asp-for="Photo" id="photoInput" class="d-none" accept="image/*">
+                    <input type="hidden" asp-for="IsImageRemoved" id="isImageRemoved" value="false" />
 
                     <div class="vstack gap-3">
-                        @* Name *@
                         <div>
-                            <label class="form-label small fw-bold text-uppercase text-secondary ls-wide mb-1" asp-for="FullName"></label>
+                            <label class="form-label ls-wide fw-bold text-uppercase text-secondary" asp-for="Name"></label>
                             <div class="input-group">
-                                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-person"></i></span>
-                                <input asp-for="FullName" class="form-control border-start-0 ps-0 bg-white" placeholder="Full Name" />
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                                <input class="form-control border-start-0 bg-light-subtle" asp-for="Name" />
                             </div>
-                            <span asp-validation-for="FullName" class="text-danger x-small"></span>
+                            <span class="text-danger x-small" asp-validation-for="Name"></span>
                         </div>
 
-                        @* Username *@
                         <div>
-                            <label class="form-label small fw-bold text-uppercase text-secondary ls-wide mb-1" asp-for="Username"></label>
+                            <label class="form-label ls-wide fw-bold text-uppercase text-secondary" asp-for="Email"></label>
                             <div class="input-group">
-                                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-at"></i></span>
-                                <input asp-for="Username" class="form-control border-start-0 ps-0 bg-white" placeholder="Username" />
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                                <input class="form-control border-start-0 bg-light-subtle" asp-for="Email" />
                             </div>
-                            <span asp-validation-for="Username" class="text-danger x-small"></span>
+                            <span class="text-danger x-small" asp-validation-for="Email"></span>
                         </div>
 
-                        @* Email *@
-                        <div>
-                            <label class="form-label small fw-bold text-uppercase text-secondary ls-wide mb-1" asp-for="Email"></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
-                                <input asp-for="Email" class="form-control border-start-0 ps-0 bg-white" placeholder="Email Address" />
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label class="form-label ls-wide fw-bold text-uppercase text-secondary" asp-for="Departement"></label>
+                                <select class="form-select bg-light-subtle" asp-for="Departement" asp-items="@Model.Departements">
+                                    <option value="">Select Dept</option>
+                                </select>
                             </div>
-                            <span asp-validation-for="Email" class="text-danger x-small"></span>
+                            <div class="col-sm-6">
+                                <label class="form-label ls-wide fw-bold text-uppercase text-secondary" asp-for="DateOfBirth">Birth Date</label>
+                                <input class="form-control bg-light-subtle" asp-for="DateOfBirth" type="date" />
+                            </div>
                         </div>
 
-                        @* Phone *@
-                        <div>
-                            <label class="form-label small fw-bold text-uppercase text-secondary ls-wide mb-1" asp-for="PhoneNumber"></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-telephone"></i></span>
-                                <input asp-for="PhoneNumber" class="form-control border-start-0 ps-0 bg-white" placeholder="Phone Number" />
-                            </div>
-                            <span asp-validation-for="PhoneNumber" class="text-danger x-small"></span>
-                        </div>
-
-                        @* Buttons - Centered and Full Width *@
-                        <div class="pt-4 d-grid gap-2">
+                        <div class="pt-3 d-grid gap-2">
                             <button type="submit" class="btn btn-primary py-2 fw-bold rounded-3 shadow-sm">
                                 Save Profile Changes
                             </button>
-                            <a asp-action="Index" class="btn btn-link text-secondary text-decoration-none small py-2">
-                                Cancel and return
+                            <a asp-action="Index" class="btn btn-link text-secondary text-decoration-none small">
+                                Cancel
                             </a>
                         </div>
                     </div>
@@ -94,42 +87,61 @@
 
 <style>
     .ls-wide {
-        letter-spacing: 0.08rem;
-        font-size: 0.7rem;
+        letter-spacing: 0.06rem;
+        font-size: 0.65rem;
     }
 
     .x-small {
         font-size: 0.75rem;
     }
 
+    .action-btn {
+        transition: all 0.2s ease;
+        z-index: 5;
+    }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
     .input-group-text {
         border-color: #dee2e6;
     }
 
-    .form-control:focus {
+    .form-control:focus, .form-select:focus {
         border-color: #0d6efd;
-        box-shadow: none;
-    }
-    /* Symmetrical border radius for input groups */
-    .input-group-text {
-        border-radius: 0.5rem 0 0 0.5rem !important;
-    }
-
-    .form-control {
-        border-radius: 0 0.5rem 0.5rem 0 !important;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
     }
 </style>
 
 @section Script {
+    <partial name="_ValidationScriptsPartial" />
     <script>
-        function previewImage(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    document.getElementById('profilePreview').setAttribute('src', e.target.result);
-                };
-                reader.readAsDataURL(input.files[0]);
+        const photoInput = document.getElementById('photoInput');
+        const preview = document.getElementById('profilePreview');
+        const removeBtn = document.getElementById('removeBtn');
+        const isRemovedHidden = document.getElementById('isImageRemoved');
+        const defaultImg = "/images/noimage.png";
+
+        // Handle File Selection (Upload)
+        photoInput.addEventListener('change', function (e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    preview.src = event.target.result;
+                    isRemovedHidden.value = "false"; // Don't delete if we just uploaded
+                    removeBtn.classList.remove('d-none'); // Show trash button
+                }
+                reader.readAsDataURL(this.files[0]);
             }
-        }
+        });
+
+        // Handle Removal (Trash Icon)
+        removeBtn.addEventListener('click', function () {
+            preview.src = defaultImg;
+            photoInput.value = ""; // Clear file input if any
+            isRemovedHidden.value = "true"; // Tell the server to delete the file
+            this.classList.add('d-none'); // Hide trash button
+        });
     </script>
 }

@@ -26,7 +26,7 @@
     </div>
 
     @* Main Content Card *@
-    <div class="card shadow-sm border-0">
+    <div class="card shadow-sm border-1 border-light-subtle">
         <div class="card-header bg-white py-3">
             <div class="input-group">
                 <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
@@ -78,9 +78,11 @@
                                         <i class="bi bi-pencil text-secondary"></i>
                                     </a>
                                     @* Delete requires a form to be secure *@
-                                    <button type="button" class="btn btn-white btn-sm border"
-                                            onclick="confirmDelete('@employee.Id', '@employee.Name')"
-                                            title="Delete">
+                                    <button type="button" class="btn btn-white btn-sm border" title="Delete"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmDeleteModal"
+                                            data-bs-id="@employee.Id"
+                                            data-bs-name="@employee.Name">
                                         <i class="bi bi-trash text-danger"></i>
                                     </button>
                                 </div>
@@ -101,21 +103,24 @@
     </div>
 </div>
 
+@await Html.PartialAsync("_DeleteConfirmationPartial", new DeleteModalViewModel
+{
+    ModalController = "Home",
+    ModalAction = "DeleteEmployee",
+    ModalId = "confirmDeleteModal",
+    RouteId = "",
+    ItemName = ""
+})
+
 @section Script {
     <script>
         // Instant Search Logic
-        document.getElementById('employeeSearch').addEventListener('input', function() {
+        document.getElementById('employeeSearch').addEventListener('input', function () {
             const filter = this.value.toLowerCase();
             document.querySelectorAll('.employee-row').forEach(row => {
                 const text = row.innerText.toLowerCase();
                 row.classList.toggle('d-none', !text.includes(filter));
             });
         });
-
-        function confirmDelete(id, name) {
-            // You can link this to your existing Delete Modal
-            console.log("Delete triggered for: " + name);
-            // Trigger your modal here...
-        }
     </script>
 }

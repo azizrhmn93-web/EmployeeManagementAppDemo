@@ -10,23 +10,19 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace EmployeeManagement.Controllers
 {
-    //Attribute routing to Home 
-    //[Route("")]
-    //[Route("[controller]")]
-
     public class HomeController : Controller
     {
         private IEmployeeDepository _employeeDepository;
         private readonly IWebHostEnvironment hostEnvironment;
 
+        //Constructor Injection
         public HomeController(IEmployeeDepository employeeDepository, IWebHostEnvironment hostEnvironment)
         {
             _employeeDepository = employeeDepository;
             this.hostEnvironment = hostEnvironment;
         }
 
-        //[Route("")]
-        //[Route("[action]")]
+
         [AllowAnonymous]
         public IActionResult Index(string? q)
         {
@@ -42,19 +38,18 @@ namespace EmployeeManagement.Controllers
                     (!string.IsNullOrEmpty(e.Email) && e.Email.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
                     e.Departement.ToString().Contains(term, StringComparison.OrdinalIgnoreCase)
                 );
-
+                // Pass the search term to the view for display 
                 ViewBag.SearchQuery = term;
             }
-
             return View(model);
         }
 
-        //[Route("[action]/{id}")]
+
         [HttpGet]
         public IActionResult Details(int id)
         {
             //throw new Exception("Error in Details View");
-            Employee employee = _employeeDepository.GetEmployee(id);
+            Employee? employee = _employeeDepository.GetEmployee(id);
             if (employee == null)
             {
                 Response.StatusCode = 404;
@@ -85,7 +80,7 @@ namespace EmployeeManagement.Controllers
 
             if (ModelState.IsValid)
             {
-                string uniqueName = ProcessUploadFile(model);
+                string? uniqueName = ProcessUploadFile(model);
 
                 //binding data to Employee object
                 Employee newEmployee = new Employee()
@@ -105,9 +100,9 @@ namespace EmployeeManagement.Controllers
             return View(model);
         }
 
-        private string ProcessUploadFile(CreateViewModel model)
+        private string? ProcessUploadFile(CreateViewModel model)
         {
-            string uniqueName = null;
+            string? uniqueName = null;
             if (model.Photo != null)
             {
                 string uploadsFolder = Path.Combine(hostEnvironment.WebRootPath, "images");
@@ -123,17 +118,22 @@ namespace EmployeeManagement.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            Employee employee = _employeeDepository.GetEmployee(id);
-            EditViewModel editViewModel = new EditViewModel
+            Employee? employee = _employeeDepository.GetEmployee(id);
+            if (employee == null)
+            {
+                Response.StatusCode = 404;
+                return View("EmployeeNotFound", id);
+            }
+            EditViewModel editViewModel = new EditViewModel()
             {
                 Id = employee.Id,
                 Name = employee.Name,
-                Departement = employee.Departement,
                 Email = employee.Email,
-                existingPhotoPath = employee.PhotoPath,
-                Departements = EnumExtension.ToSelectList<Dept>(),
+                Departement = employee.Departement,
+                ExistingImagePath = employee.PhotoPath,
                 DateOfBirth = employee.DateOfBirth
             };
+            editViewModel.Departements = EnumExtension.ToSelectList<Dept>();
             return View(editViewModel);
         }
 
@@ -142,34 +142,51 @@ namespace EmployeeManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                Employee employee = _employeeDepository.GetEmployee(model.Id);
+                Employee? employee = _employeeDepository.GetEmployee(model.Id);
+                if (employee == null)
+                {
+                    Response.StatusCode = 404;
+                    return View("EmployeeNotFound", model.Id);
+                }
                 employee.Name = model.Name;
                 employee.Email = model.Email;
                 employee.Departement = model.Departement;
                 employee.DateOfBirth = model.DateOfBirth;
-                if (model.existingPhotoPath != null)
+                if (model.Photo != null)
                 {
-                    if (model.Photo != null)
-                    {
-                        string filePath = Path.Combine(hostEnvironment.WebRootPath, "images", model.existingPhotoPath);
-                        System.IO.File.Delete(filePath);
-                    }
-                }
-                if (model.Photo == null)
-                    employee.PhotoPath = model.existingPhotoPath;
-                else
+                    DeleteFile(model.ExistingImagePath);
                     employee.PhotoPath = ProcessUploadFile(model);
+                }
+                else if (model.IsImageRemoved)
+                {
+                    DeleteFile(model.ExistingImagePath);
+                    employee.PhotoPath = null;
+                }
                 _employeeDepository.UpdateEmployee(employee);
                 return RedirectToAction("index");
             }
             model.Departements = EnumExtension.ToSelectList<Dept>();
-            return View();
+            return View(model);
+
+
+            // Local function to delete a file
+            void DeleteFile(string? FileName)
+            {
+                if (!string.IsNullOrEmpty(FileName))
+                {
+                    string filePath = Path.Combine(hostEnvironment.WebRootPath, "images", FileName);
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
+            }
         }
 
         [HttpPost]
         public IActionResult DeleteEmployee(int id)
         {
-            Employee employee = _employeeDepository.GetEmployee(id);
+            Employee? employee = _employeeDepository.GetEmployee(id);
             if(employee == null)
             {
                 ViewBag.Message = $"Employee with {id} cannot be found";
@@ -181,16 +198,5 @@ namespace EmployeeManagement.Controllers
             return RedirectToAction("index");
 
         }
-        // Passing data to a view throug ViewBag property
-        //attribute routing
-        //[Route("[action]/{id:int:min(1):max(3)}")]
-        //public IActionResult Details(int id)
-        //{
-        //    var model = _employeeDepository.Get(id);
-        //    ViewBag.PageTitle = "Employee Details";
-        //    ViewBag.EmployeeDetail = model;
-        //    return View("DetailsByViewBag", model);
-        //}
-
     }
 }

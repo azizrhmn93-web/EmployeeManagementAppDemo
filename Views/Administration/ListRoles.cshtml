@@ -92,39 +92,3 @@
     RouteId = "",
     ItemName = "{Name}" // This is just a placeholder
 })
-
-@section Script {
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var deleteModal = document.getElementById('confirmDeleteModal');
-
-            if (deleteModal) {
-                deleteModal.addEventListener('show.bs.modal', function (event) {
-                    // 1. The button that was clicked
-                    var button = event.relatedTarget;
-
-                    // 2. Extract info from the data-bs-* attributes we set in the loop
-                    var roleId = button.getAttribute('data-bs-id');
-                    var roleName = button.getAttribute('data-bs-name');
-
-                    // 3. Update the Modal's text and hidden inputs
-                    // This finds the <strong> tag where the name is displayed
-                    var modalNamePlaceholder = deleteModal.querySelector('.modal-body strong');
-                    // This finds the hidden input for the ID
-                    var modalIdInput = deleteModal.querySelector('input[name="id"]');
-                    var modalUserIdInput = deleteModal.querySelector('input[name="userId"]');
-
-                    if (modalNamePlaceholder) {
-                        modalNamePlaceholder.textContent = roleName;
-                    }
-                    if (modalIdInput) {
-                        modalIdInput.value = roleId;
-                    }
-                    if (modalUserIdInput) {
-                        modalUserIdInput.value = roleId;
-                    }
-                });
-            }
-        });
-    </script>
-}
